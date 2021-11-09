@@ -1,6 +1,6 @@
 {
-    "name": "my_first_app",
-    "short_name": "my_first_app",
+    "name": "task1",
+    "short_name": "task1",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
