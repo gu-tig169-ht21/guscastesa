@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 
-final List<String> _toDoInputs = <String>[];
+// detta är min kod kopiera inte din lille jäkel. Mvh samuel castenström
+List<String> _toDoInputs = <String>[];
+List<String> _toDoInputsDone = <String>[];
+List<String> _toDoInputsNotDone = <String>[];
 final _toDoController = TextEditingController();
 final _done = <String>[];
+String _valdFiltrering = 'All';
 
 void main() {
   runApp(
@@ -13,6 +17,8 @@ void main() {
   );
 }
 
+//lägg conditions på input, inga tomma inga dubletter
+//------------------Första sidan-------------------------
 class ToDoHome extends StatefulWidget {
   const ToDoHome({Key? key}) : super(key: key);
   @override
@@ -23,25 +29,111 @@ class _ToDoHomeState extends State<ToDoHome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-            icon: const Icon(Icons.menu),
-            tooltip: 'Add and remove items',
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ToDoInput()),
-              ).then((value) => setState(() {}));
-            }),
-        title: const Text('Att-göra lista'),
-      ),
-      body: skapaLista(),
+      appBar: AppBar(title: const Text('Att-göra lista'), actions: [
+        DropdownButton(
+          value: _valdFiltrering,
+          items: <String>['Done', 'Not Done', 'All'].map((String value) {
+            return DropdownMenuItem(
+              value: value,
+              child: Text(value),
+            );
+          }).toList(),
+          onChanged: (String? newValue) {
+            setState(() {
+              _valdFiltrering = newValue!;
+            });
+          },
+        )
+      ]),
+      body: _filtrera(),
+      floatingActionButton: FloatingActionButton(
+          child: const Icon(Icons.add),
+          tooltip: 'Add item',
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ToDoInput()),
+            ).then((value) => setState(() {}));
+          }),
     );
+  }
+
+  Widget _filtrera() {
+    // filtrerar igenom beroende på vald filtrering i dropdownen
+    //returnerar en skapaLista med den relevanta filtrerade
+    //eller ofiltrerade listan
+
+    switch (_valdFiltrering) {
+      case 'Done':
+        {
+          _toDoInputsDone.clear();
+          for (int i = 0; i < _toDoInputs.length; i++) {
+            if (_done.contains(_toDoInputs[i])) {
+              _toDoInputsDone.add(_toDoInputs[i]);
+            }
+          }
+          return skapaLista(_toDoInputsDone);
+        }
+      case 'Not Done':
+        {
+          _toDoInputsNotDone.clear();
+          for (int i = 0; i < _toDoInputs.length; i++) {
+            if (!_done.contains(_toDoInputs[i])) {
+              _toDoInputsNotDone.add(_toDoInputs[i]);
+            }
+          }
+          return skapaLista(_toDoInputsNotDone);
+        }
+      case 'All':
+        {
+          return skapaLista(_toDoInputs);
+        }
+      default:
+        return skapaLista(_toDoInputs);
+    }
+    // return ListView.builder(
+    //     padding: const EdgeInsets.all(16.0),
+    //     itemBuilder: (BuildContext _context, int i) {
+    //       switch (text) {
+    //         case 'Done':
+    //           {
+    //             if (i < _toDoInputs.length && _done.contains(text)) {
+    //               return _skapaRad(_toDoInputs[i]);
+    //             } else {
+    //               return const Divider(
+    //                 color: Colors.white,
+    //               );
+    //             }
+    //           }
+    //         case 'Not Done':
+    //           {
+    //             if (i < _toDoInputs.length && !_done.contains(text)) {
+    //               return _skapaRad(_toDoInputs[i]);
+    //             } else {
+    //               return const Divider(
+    //                 color: Colors.white,
+    //               );
+    //             }
+    //           }
+    //         case 'None':
+    //           {
+    //             if (i < _toDoInputs.length) {
+    //               return _skapaRad(_toDoInputs[i]);
+    //             } else {
+    //               return const Divider(
+    //                 color: Colors.white,
+    //               );
+    //             }
+    //           }
+    //         default:
+    //           throw '';
+    //       }
+    //     });
   }
 
   Widget _skapaRad(String text) {
     final _alreadyDone = _done.contains(text);
-
+    //denna widget skapar raderna i att göra listan.
     _toDoInputs.contains(text) ? null : _toDoInputs.add(text);
     return Card(
         child: ListTile(
@@ -71,12 +163,15 @@ class _ToDoHomeState extends State<ToDoHome> {
     ));
   }
 
-  Widget skapaLista() {
+  Widget skapaLista(List<String> skapadLista) {
+    //Denna widget tar listan från filtrering och itererar igenom den
+    //skapar en listview och kallar skapaRad för varje objekt i listan
+    //den får
     return ListView.builder(
         padding: const EdgeInsets.all(16.0),
         itemBuilder: (BuildContext _context, int i) {
-          if (i < _toDoInputs.length) {
-            return _skapaRad(_toDoInputs[i]);
+          if (i < skapadLista.length) {
+            return _skapaRad(skapadLista[i]);
           } else {
             return const Divider(
               color: Colors.white,
@@ -86,6 +181,7 @@ class _ToDoHomeState extends State<ToDoHome> {
   }
 }
 
+//--------------------Andra sida-----------------------------
 class ToDoInput extends StatefulWidget {
   const ToDoInput({Key? key}) : super(key: key);
   @override
@@ -102,21 +198,74 @@ class _ToDoInputState extends State<ToDoInput> {
         body: Center(
             child: Column(
           children: <Widget>[
-            TextField(controller: _toDoController),
+            TextField(
+              controller: _toDoController,
+              decoration: const InputDecoration(
+                labelText: 'Vad ska du göra?',
+                border: OutlineInputBorder(),
+              ),
+            ),
             const Divider(
               height: 20,
             ),
             OutlinedButton(
                 onPressed: () {
-                  setState(() {
-                    _toDoInputs.add(_toDoController.text);
-                    _toDoController.clear();
-                  });
+                  if (_toDoController.text.isEmpty ||
+                      _toDoInputs.contains(_toDoController.text)) {
+                    setState(() {
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text('Input error'),
+                              content: Container(
+                                child: Text(
+                                  _toDoController.text.isEmpty
+                                      ? 'Du måste ange en sak att göra'
+                                      : 'Du kan ej ange dubletter',
+                                ),
+                              ),
+                              actions: <Widget>[
+                                TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const Text('ok'))
+                              ],
+                            );
+                          });
+                    });
+                  } else {
+                    setState(() {
+                      _toDoInputs.add(_toDoController.text);
+                      _toDoController.clear();
+                    });
+                  }
                 },
                 child: const Text('lägg till')),
           ],
         )));
   }
+
+  // Widget _inputErrorPopup(BuildContext context, String _fel) {
+  //   showDialog(
+  //       context: context,
+  //       builder: (BuildContext context) {
+  //         return AlertDialog(
+  //           title: const Text('Input error'),
+  //           content: Container(
+  //             child: Text(_fel),
+  //           ),
+  //           actions: <Widget>[
+  //             TextButton(
+  //                 onPressed: () {
+  //                   Navigator.of(context).pop();
+  //                 },
+  //                 child: const Text('ok'))
+  //           ],
+  //         );
+  //       });
+  // }
 
 //  void addInputToList() {
 //    setState(() {
@@ -136,3 +285,4 @@ class _ToDoInputState extends State<ToDoInput> {
 //  )
 //}
 //}         FIXA EN TEXTSTYLE OCH EN BUTTONSTYLE
+// detta är min kod kopiera inte din lille jäkel. Mvh samuel castenström
