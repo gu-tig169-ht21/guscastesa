@@ -31,6 +31,7 @@ class _ToDoHomeState extends State<ToDoHome> {
     return Scaffold(
       appBar: AppBar(title: const Text('Att-göra lista'), actions: [
         DropdownButton(
+          //dropdownbutton som ger värde till filtreringen
           value: _valdFiltrering,
           items: <String>['Done', 'Not Done', 'All'].map((String value) {
             return DropdownMenuItem(
@@ -47,6 +48,7 @@ class _ToDoHomeState extends State<ToDoHome> {
       ]),
       body: _filtrera(),
       floatingActionButton: FloatingActionButton(
+          //knapp som flyttar till sidan som hanterar input
           child: const Icon(Icons.add),
           tooltip: 'Add item',
           onPressed: () {
@@ -144,6 +146,7 @@ class _ToDoHomeState extends State<ToDoHome> {
         ),
       ),
       leading: Icon(
+        //iconen som visas för sparade vs inte sparade
         _alreadyDone ? Icons.check_box : Icons.check_box_outline_blank_outlined,
         color: _alreadyDone ? Colors.green : null,
       ),
@@ -153,6 +156,7 @@ class _ToDoHomeState extends State<ToDoHome> {
         });
       },
       trailing: IconButton(
+        //knappen för att ta bort något från listan
         onPressed: () {
           setState(() {
             _toDoInputs.remove(text);
@@ -199,6 +203,7 @@ class _ToDoInputState extends State<ToDoInput> {
             child: Column(
           children: <Widget>[
             TextField(
+              //textfält för input
               controller: _toDoController,
               decoration: const InputDecoration(
                 labelText: 'Vad ska du göra?',
@@ -209,11 +214,14 @@ class _ToDoInputState extends State<ToDoInput> {
               height: 20,
             ),
             OutlinedButton(
+                //denna knapp skickar input från textfältet till _toDoInputs
                 onPressed: () {
                   if (_toDoController.text.isEmpty ||
                       _toDoInputs.contains(_toDoController.text)) {
+                    //if satsen kollar om textfältet är tomt eller om det finns en dublett i listan.
                     setState(() {
                       showDialog(
+                          //pop-up dialog med felmeddelande vid null eller dubletter
                           context: context,
                           builder: (BuildContext context) {
                             return AlertDialog(
