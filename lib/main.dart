@@ -100,6 +100,7 @@ class _ToDoHomeState extends State<ToDoHome> {
     //         case 'Done':
     //           {
     //             if (i < _toDoInputs.length && _done.contains(text)) {
+    //        sno inte min kod Mvh samuel
     //               return _skapaRad(_toDoInputs[i]);
     //             } else {
     //               return const Divider(
@@ -185,6 +186,7 @@ class _ToDoHomeState extends State<ToDoHome> {
   }
 }
 
+//
 //--------------------Andra sida-----------------------------
 class ToDoInput extends StatefulWidget {
   const ToDoInput({Key? key}) : super(key: key);
@@ -253,7 +255,7 @@ class _ToDoInputState extends State<ToDoInput> {
                 child: const Text('lägg till')),
           ],
         )));
-  }
+  } //detta är min kod, sno inte mvh samuel castenström
 
   // Widget _inputErrorPopup(BuildContext context, String _fel) {
   //   showDialog(
@@ -267,6 +269,8 @@ class _ToDoInputState extends State<ToDoInput> {
   //           actions: <Widget>[
   //             TextButton(
   //                 onPressed: () {
+  //                  sno inte min kod
+  //                    mvh samuel
   //                   Navigator.of(context).pop();
   //                 },
   //                 child: const Text('ok'))
