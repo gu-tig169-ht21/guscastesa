@@ -11,6 +11,7 @@ String _valdFiltrering = 'All';
 void main() {
   runApp(
     const MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'To-Do list',
       home: ToDoHome(),
     ),
@@ -93,45 +94,6 @@ class _ToDoHomeState extends State<ToDoHome> {
       default:
         return skapaLista(_toDoInputs);
     }
-    // return ListView.builder(
-    //     padding: const EdgeInsets.all(16.0),
-    //     itemBuilder: (BuildContext _context, int i) {
-    //       switch (text) {
-    //         case 'Done':
-    //           {
-    //             if (i < _toDoInputs.length && _done.contains(text)) {
-    //        sno inte min kod Mvh samuel
-    //               return _skapaRad(_toDoInputs[i]);
-    //             } else {
-    //               return const Divider(
-    //                 color: Colors.white,
-    //               );
-    //             }
-    //           }
-    //         case 'Not Done':
-    //           {
-    //             if (i < _toDoInputs.length && !_done.contains(text)) {
-    //               return _skapaRad(_toDoInputs[i]);
-    //             } else {
-    //               return const Divider(
-    //                 color: Colors.white,
-    //               );
-    //             }
-    //           }
-    //         case 'None':
-    //           {
-    //             if (i < _toDoInputs.length) {
-    //               return _skapaRad(_toDoInputs[i]);
-    //             } else {
-    //               return const Divider(
-    //                 color: Colors.white,
-    //               );
-    //             }
-    //           }
-    //         default:
-    //           throw '';
-    //       }
-    //     });
   }
 
   Widget _skapaRad(String text) {
@@ -202,60 +164,94 @@ class _ToDoInputState extends State<ToDoInput> {
           title: const Text('lägg till sak att göra'),
         ),
         body: Center(
-            child: Column(
-          children: <Widget>[
-            TextField(
-              //textfält för input
-              controller: _toDoController,
-              decoration: const InputDecoration(
-                labelText: 'Vad ska du göra?',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const Divider(
-              height: 20,
-            ),
-            OutlinedButton(
-                //denna knapp skickar input från textfältet till _toDoInputs
-                onPressed: () {
-                  if (_toDoController.text.isEmpty ||
-                      _toDoInputs.contains(_toDoController.text)) {
-                    //if satsen kollar om textfältet är tomt eller om det finns en dublett i listan.
-                    setState(() {
-                      showDialog(
-                          //pop-up dialog med felmeddelande vid null eller dubletter
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: const Text('Input error'),
-                              content: Container(
-                                child: Text(
-                                  _toDoController.text.isEmpty
-                                      ? 'Du måste ange en sak att göra'
-                                      : 'Du kan ej ange dubletter',
-                                ),
-                              ),
-                              actions: <Widget>[
-                                TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: const Text('ok'))
-                              ],
-                            );
-                          });
-                    });
-                  } else {
-                    setState(() {
-                      _toDoInputs.add(_toDoController.text);
-                      _toDoController.clear();
-                    });
-                  }
-                },
-                child: const Text('lägg till')),
-          ],
-        )));
+            child: Container(
+                alignment: Alignment.center,
+                child: SizedBox(
+                    width: 300,
+                    height: 200,
+                    child: Column(
+                      children: <Widget>[
+                        TextField(
+                          //textfält för input
+                          textInputAction: TextInputAction.done,
+                          //du behöver inte trycka på lägg till knappen, textInputaction göra tt du kan trycka enter.
+                          onSubmitted: (text) {
+                            _inputHandling(text);
+                          },
+                          controller: _toDoController,
+                          decoration: const InputDecoration(
+                            labelText: 'Vad ska du göra?',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        const Divider(
+                          height: 20,
+                        ),
+                        OutlinedButton(
+                            //denna knapp skickar input från textfältet till _inputHandling
+                            onPressed: () {
+                              _inputHandling(_toDoController.text);
+                            },
+                            child: const Text('lägg till')),
+                      ],
+                    )))));
   } //detta är min kod, sno inte mvh samuel castenström
+
+  void _inputHandling(String text) {
+    //denna metod hanterar och testar input
+    if (text.isEmpty || _toDoInputs.contains(text)) {
+      //if satsen kollar om textfältet är tomt eller om det finns en dublett i listan.
+      setState(() {
+        showDialog(
+            //pop-up dialog med felmeddelande vid null eller dubletter
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text('Input error'),
+                content: Container(
+                  child: Text(
+                    text.isEmpty
+                        ? 'Du måste ange en sak att göra'
+                        : 'Du kan ej ange dubletter',
+                  ),
+                ),
+                actions: <Widget>[
+                  TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text('ok'))
+                ],
+              );
+            });
+        _toDoController.clear();
+      });
+    } else {
+      //om textinputen är ok skickas den vidare till _toDoInputs
+      setState(() {
+        _toDoInputs.add(text);
+        _toDoController.clear();
+      });
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   // Widget _inputErrorPopup(BuildContext context, String _fel) {
   //   showDialog(
@@ -284,9 +280,6 @@ class _ToDoInputState extends State<ToDoInput> {
 
 //    });
 //  }
-}
-
-
 
 //class _ToDoListState extends State<toDoHome>{
 //
@@ -298,3 +291,75 @@ class _ToDoInputState extends State<ToDoInput> {
 //}
 //}         FIXA EN TEXTSTYLE OCH EN BUTTONSTYLE
 // detta är min kod kopiera inte din lille jäkel. Mvh samuel castenström
+                              // if (_toDoController.text.isEmpty ||
+                              //     _toDoInputs.contains(_toDoController.text)) {
+                              //   //if satsen kollar om textfältet är tomt eller om det finns en dublett i listan.
+                              //   setState(() {
+                              //     showDialog(
+                              //         //pop-up dialog med felmeddelande vid null eller dubletter
+                              //         context: context,
+                              //         builder: (BuildContext context) {
+                              //           return AlertDialog(
+                              //             title: const Text('Input error'),
+                              //             content: Container(
+                              //               child: Text(
+                              //                 _toDoController.text.isEmpty
+                              //                     ? 'Du måste ange en sak att göra'
+                              //                     : 'Du kan ej ange dubletter',
+                              //               ),
+                              //             ),
+                              //             actions: <Widget>[
+                              //               TextButton(
+                              //                   onPressed: () {
+                              //                     Navigator.of(context).pop();
+                              //                   },
+                              //                   child: const Text('ok'))
+                              //             ],
+                              //           );
+                              //         });
+                              //   });
+                              // } else {
+                              //   setState(() {
+                             //     _toDoInputs.add(_toDoController.text);
+                              //     _toDoController.clear();
+                              //   });
+                              // }
+    // return ListView.builder(
+    //     padding: const EdgeInsets.all(16.0),
+    //     itemBuilder: (BuildContext _context, int i) {
+    //       switch (text) {
+    //         case 'Done':
+    //           {
+    //             if (i < _toDoInputs.length && _done.contains(text)) {
+    //        sno inte min kod Mvh samuel
+    //               return _skapaRad(_toDoInputs[i]);
+    //             } else {
+    //               return const Divider(
+    //                 color: Colors.white,
+    //               );
+    //             }
+    //           }
+    //         case 'Not Done':
+    //           {
+    //             if (i < _toDoInputs.length && !_done.contains(text)) {
+    //               return _skapaRad(_toDoInputs[i]);
+    //             } else {
+    //               return const Divider(
+    //                 color: Colors.white,
+    //               );
+    //             }
+    //           }
+    //         case 'None':
+    //           {
+    //             if (i < _toDoInputs.length) {
+    //               return _skapaRad(_toDoInputs[i]);
+    //             } else {
+    //               return const Divider(
+    //                 color: Colors.white,
+    //               );
+    //             }
+    //           }
+    //         default:
+    //           throw '';
+    //       }
+    //     });
