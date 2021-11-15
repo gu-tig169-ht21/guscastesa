@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'api_implementering.dart';
 
 // detta är min kod kopiera inte din lille jäkel. Mvh samuel castenström
 List<String> _toDoInputs = <String>[];
@@ -60,6 +61,19 @@ class _ToDoHomeState extends State<ToDoHome> {
           }),
     );
   }
+
+  void _addToInputsFromApi() {
+    List<ToDoPost> lista = APIintegration().returnList();
+    lista.forEach((ToDoPost) {
+      _toDoInputs.add(ToDoPost.title);
+
+      if (ToDoPost.done) {
+        _done.add(ToDoPost.title);
+      }
+    });
+  }
+
+  void _addInputsToApi() {}
 
   Widget _filtrera() {
     // filtrerar igenom beroende på vald filtrering i dropdownen
