@@ -1,115 +1,300 @@
 import 'package:flutter/material.dart';
 
+// detta är min kod kopiera inte din lille jäkel. Mvh samuel castenström
+List<String> _toDoInputs = <String>[];
+List<String> _toDoInputsDone = <String>[];
+List<String> _toDoInputsNotDone = <String>[];
+final _toDoController = TextEditingController();
+final _done = <String>[];
+String _valdFiltrering = 'All';
+
 void main() {
-  runApp(const MyApp());
+  runApp(
+    const MaterialApp(
+      title: 'To-Do list',
+      home: ToDoHome(),
+    ),
+  );
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+//lägg conditions på input, inga tomma inga dubletter
+//------------------Första sidan-------------------------
+class ToDoHome extends StatefulWidget {
+  const ToDoHome({Key? key}) : super(key: key);
+  @override
+  _ToDoHomeState createState() => _ToDoHomeState();
+}
 
-  // This widget is the root of your application.
+class _ToDoHomeState extends State<ToDoHome> {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+    return Scaffold(
+      appBar: AppBar(title: const Text('Att-göra lista'), actions: [
+        DropdownButton(
+          //dropdownbutton som ger värde till filtreringen
+          value: _valdFiltrering,
+          items: <String>['Done', 'Not Done', 'All'].map((String value) {
+            return DropdownMenuItem(
+              value: value,
+              child: Text(value),
+            );
+          }).toList(),
+          onChanged: (String? newValue) {
+            setState(() {
+              _valdFiltrering = newValue!;
+            });
+          },
+        )
+      ]),
+      body: _filtrera(),
+      floatingActionButton: FloatingActionButton(
+          //knapp som flyttar till sidan som hanterar input
+          child: const Icon(Icons.add),
+          tooltip: 'Add item',
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ToDoInput()),
+            ).then((value) => setState(() {}));
+          }),
     );
   }
-}
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
+  Widget _filtrera() {
+    // filtrerar igenom beroende på vald filtrering i dropdownen
+    //returnerar en skapaLista med den relevanta filtrerade
+    //eller ofiltrerade listan
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+    switch (_valdFiltrering) {
+      case 'Done':
+        {
+          _toDoInputsDone.clear();
+          for (int i = 0; i < _toDoInputs.length; i++) {
+            if (_done.contains(_toDoInputs[i])) {
+              _toDoInputsDone.add(_toDoInputs[i]);
+            }
+          }
+          return skapaLista(_toDoInputsDone);
+        }
+      case 'Not Done':
+        {
+          _toDoInputsNotDone.clear();
+          for (int i = 0; i < _toDoInputs.length; i++) {
+            if (!_done.contains(_toDoInputs[i])) {
+              _toDoInputsNotDone.add(_toDoInputs[i]);
+            }
+          }
+          return skapaLista(_toDoInputsNotDone);
+        }
+      case 'All':
+        {
+          return skapaLista(_toDoInputs);
+        }
+      default:
+        return skapaLista(_toDoInputs);
+    }
+    // return ListView.builder(
+    //     padding: const EdgeInsets.all(16.0),
+    //     itemBuilder: (BuildContext _context, int i) {
+    //       switch (text) {
+    //         case 'Done':
+    //           {
+    //             if (i < _toDoInputs.length && _done.contains(text)) {
+    //        sno inte min kod Mvh samuel
+    //               return _skapaRad(_toDoInputs[i]);
+    //             } else {
+    //               return const Divider(
+    //                 color: Colors.white,
+    //               );
+    //             }
+    //           }
+    //         case 'Not Done':
+    //           {
+    //             if (i < _toDoInputs.length && !_done.contains(text)) {
+    //               return _skapaRad(_toDoInputs[i]);
+    //             } else {
+    //               return const Divider(
+    //                 color: Colors.white,
+    //               );
+    //             }
+    //           }
+    //         case 'None':
+    //           {
+    //             if (i < _toDoInputs.length) {
+    //               return _skapaRad(_toDoInputs[i]);
+    //             } else {
+    //               return const Divider(
+    //                 color: Colors.white,
+    //               );
+    //             }
+    //           }
+    //         default:
+    //           throw '';
+    //       }
+    //     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
+  Widget _skapaRad(String text) {
+    final _alreadyDone = _done.contains(text);
+    //denna widget skapar raderna i att göra listan.
+    _toDoInputs.contains(text) ? null : _toDoInputs.add(text);
+    return Card(
+        child: ListTile(
+      title: Text(
+        text,
+        style: TextStyle(
+          decoration: _alreadyDone ? TextDecoration.lineThrough : null,
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
+      leading: Icon(
+        //iconen som visas för sparade vs inte sparade
+        _alreadyDone ? Icons.check_box : Icons.check_box_outline_blank_outlined,
+        color: _alreadyDone ? Colors.green : null,
+      ),
+      onTap: () {
+        setState(() {
+          _alreadyDone ? _done.remove(text) : _done.add(text);
+        });
+      },
+      trailing: IconButton(
+        //knappen för att ta bort något från listan
+        onPressed: () {
+          setState(() {
+            _toDoInputs.remove(text);
+          });
+        },
+        icon: const Icon(Icons.delete_outline),
+      ),
+    ));
+  }
+
+  Widget skapaLista(List<String> skapadLista) {
+    //Denna widget tar listan från filtrering och itererar igenom den
+    //skapar en listview och kallar skapaRad för varje objekt i listan
+    //den får
+    return ListView.builder(
+        padding: const EdgeInsets.all(16.0),
+        itemBuilder: (BuildContext _context, int i) {
+          if (i < skapadLista.length) {
+            return _skapaRad(skapadLista[i]);
+          } else {
+            return const Divider(
+              color: Colors.white,
+            );
+          }
+        });
   }
 }
+
+//
+//--------------------Andra sida-----------------------------
+class ToDoInput extends StatefulWidget {
+  const ToDoInput({Key? key}) : super(key: key);
+  @override
+  _ToDoInputState createState() => _ToDoInputState();
+}
+
+class _ToDoInputState extends State<ToDoInput> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: const Text('lägg till sak att göra'),
+        ),
+        body: Center(
+            child: Column(
+          children: <Widget>[
+            TextField(
+              //textfält för input
+              controller: _toDoController,
+              decoration: const InputDecoration(
+                labelText: 'Vad ska du göra?',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const Divider(
+              height: 20,
+            ),
+            OutlinedButton(
+                //denna knapp skickar input från textfältet till _toDoInputs
+                onPressed: () {
+                  if (_toDoController.text.isEmpty ||
+                      _toDoInputs.contains(_toDoController.text)) {
+                    //if satsen kollar om textfältet är tomt eller om det finns en dublett i listan.
+                    setState(() {
+                      showDialog(
+                          //pop-up dialog med felmeddelande vid null eller dubletter
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text('Input error'),
+                              content: Container(
+                                child: Text(
+                                  _toDoController.text.isEmpty
+                                      ? 'Du måste ange en sak att göra'
+                                      : 'Du kan ej ange dubletter',
+                                ),
+                              ),
+                              actions: <Widget>[
+                                TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const Text('ok'))
+                              ],
+                            );
+                          });
+                    });
+                  } else {
+                    setState(() {
+                      _toDoInputs.add(_toDoController.text);
+                      _toDoController.clear();
+                    });
+                  }
+                },
+                child: const Text('lägg till')),
+          ],
+        )));
+  } //detta är min kod, sno inte mvh samuel castenström
+
+  // Widget _inputErrorPopup(BuildContext context, String _fel) {
+  //   showDialog(
+  //       context: context,
+  //       builder: (BuildContext context) {
+  //         return AlertDialog(
+  //           title: const Text('Input error'),
+  //           content: Container(
+  //             child: Text(_fel),
+  //           ),
+  //           actions: <Widget>[
+  //             TextButton(
+  //                 onPressed: () {
+  //                  sno inte min kod
+  //                    mvh samuel
+  //                   Navigator.of(context).pop();
+  //                 },
+  //                 child: const Text('ok'))
+  //           ],
+  //         );
+  //       });
+  // }
+
+//  void addInputToList() {
+//    setState(() {
+
+//    });
+//  }
+}
+
+
+
+//class _ToDoListState extends State<toDoHome>{
+//
+//  Widget addItem(String userInput){
+//  setState((){
+//      _toDoInputs.add(userInput);
+//  });
+//  )
+//}
+//}         FIXA EN TEXTSTYLE OCH EN BUTTONSTYLE
+// detta är min kod kopiera inte din lille jäkel. Mvh samuel castenström
