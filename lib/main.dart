@@ -1,13 +1,19 @@
+import 'dart:io';
+import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'api_implementering.dart';
 
 // detta är min kod kopiera inte din lille jäkel. Mvh samuel castenström
-List<String> _toDoInputs = <String>[];
-List<String> _toDoInputsDone = <String>[];
-List<String> _toDoInputsNotDone = <String>[];
+List<ToDoPost> _toDoPosterDone = <ToDoPost>[];
+List<ToDoPost> _toDoPosterNotDone = <ToDoPost>[];
+List<ToDoPost> _toDoPoster = <ToDoPost>[];
 final _toDoController = TextEditingController();
-final _done = <String>[];
 String _valdFiltrering = 'All';
+
+// Skriv om koden så att du ändrar i lokala listor samtidigt som du ändrar i api:ns lista
+// detta gör att du itne behöver vänta på en ny lista från apit varje gång.
+// du hämtar listan en gång sedan ändrar du i den lokala listan samtidigt som du ändrar i
+// API:n lista. men du hämtar bara listan en gång vid startup.
 
 void main() {
   runApp(
@@ -19,6 +25,15 @@ void main() {
   );
 }
 
+class _ApiInputHandling {
+  void addToInputsFromApi() async {
+    await APIintegration().getList();
+    List<ToDoPost> lista = List.from(APIintegration().returnList());
+    _toDoPoster.clear();
+    _toDoPoster = List.from(lista);
+  }
+}
+
 //lägg conditions på input, inga tomma inga dubletter
 //------------------Första sidan-------------------------
 class ToDoHome extends StatefulWidget {
@@ -28,6 +43,16 @@ class ToDoHome extends StatefulWidget {
 }
 
 class _ToDoHomeState extends State<ToDoHome> {
+  Future<List<ToDoPost>>? _future;
+  //APIintegration().getID();
+
+  @override
+  void initState() {
+    _future = APIintegration().getList();
+    _ApiInputHandling().addToInputsFromApi();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,7 +73,26 @@ class _ToDoHomeState extends State<ToDoHome> {
           },
         )
       ]),
-      body: _filtrera(),
+      body: FutureBuilder(
+        builder: (ctx, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            if (snapshot.hasError) {
+              return const Center(
+                child: Text(
+                  'An error occured getting todolist',
+                  style: TextStyle(fontSize: 18),
+                ),
+              );
+            } else if (snapshot.hasData) {
+              return _filtrera();
+            }
+          }
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        },
+        future: _future,
+      ),
       floatingActionButton: FloatingActionButton(
           //knapp som flyttar till sidan som hanterar input
           child: const Icon(Icons.add),
@@ -62,20 +106,8 @@ class _ToDoHomeState extends State<ToDoHome> {
     );
   }
 
-  void _addToInputsFromApi() {
-    List<ToDoPost> lista = APIintegration().returnList();
-    lista.forEach((ToDoPost) {
-      _toDoInputs.add(ToDoPost.title);
-
-      if (ToDoPost.done) {
-        _done.add(ToDoPost.title);
-      }
-    });
-  }
-
-  void _addInputsToApi() {}
-
   Widget _filtrera() {
+    //hämtar och parsar information från API:n
     // filtrerar igenom beroende på vald filtrering i dropdownen
     //returnerar en skapaLista med den relevanta filtrerade
     //eller ofiltrerade listan
@@ -83,68 +115,34 @@ class _ToDoHomeState extends State<ToDoHome> {
     switch (_valdFiltrering) {
       case 'Done':
         {
-          _toDoInputsDone.clear();
-          for (int i = 0; i < _toDoInputs.length; i++) {
-            if (_done.contains(_toDoInputs[i])) {
-              _toDoInputsDone.add(_toDoInputs[i]);
+          _toDoPosterDone.clear();
+          for (int i = 0; i < _toDoPoster.length; i++) {
+            if (_toDoPoster[i].getDone) {
+              _toDoPosterDone.add(_toDoPoster[i]);
             }
           }
-          return skapaLista(_toDoInputsDone);
+          return skapaLista(_toDoPosterDone);
         }
       case 'Not Done':
         {
-          _toDoInputsNotDone.clear();
-          for (int i = 0; i < _toDoInputs.length; i++) {
-            if (!_done.contains(_toDoInputs[i])) {
-              _toDoInputsNotDone.add(_toDoInputs[i]);
+          _toDoPosterNotDone.clear();
+          for (int i = 0; i < _toDoPoster.length; i++) {
+            if (!_toDoPoster[i].getDone) {
+              _toDoPosterNotDone.add(_toDoPoster[i]);
             }
           }
-          return skapaLista(_toDoInputsNotDone);
+          return skapaLista(_toDoPosterNotDone);
         }
       case 'All':
         {
-          return skapaLista(_toDoInputs);
+          return skapaLista(_toDoPoster);
         }
       default:
-        return skapaLista(_toDoInputs);
+        return skapaLista(_toDoPoster);
     }
   }
 
-  Widget _skapaRad(String text) {
-    final _alreadyDone = _done.contains(text);
-    //denna widget skapar raderna i att göra listan.
-    _toDoInputs.contains(text) ? null : _toDoInputs.add(text);
-    return Card(
-        child: ListTile(
-      title: Text(
-        text,
-        style: TextStyle(
-          decoration: _alreadyDone ? TextDecoration.lineThrough : null,
-        ),
-      ),
-      leading: Icon(
-        //iconen som visas för sparade vs inte sparade
-        _alreadyDone ? Icons.check_box : Icons.check_box_outline_blank_outlined,
-        color: _alreadyDone ? Colors.green : null,
-      ),
-      onTap: () {
-        setState(() {
-          _alreadyDone ? _done.remove(text) : _done.add(text);
-        });
-      },
-      trailing: IconButton(
-        //knappen för att ta bort något från listan
-        onPressed: () {
-          setState(() {
-            _toDoInputs.remove(text);
-          });
-        },
-        icon: const Icon(Icons.delete_outline),
-      ),
-    ));
-  }
-
-  Widget skapaLista(List<String> skapadLista) {
+  Widget skapaLista(List<ToDoPost> skapadLista) {
     //Denna widget tar listan från filtrering och itererar igenom den
     //skapar en listview och kallar skapaRad för varje objekt i listan
     //den får
@@ -159,6 +157,50 @@ class _ToDoHomeState extends State<ToDoHome> {
             );
           }
         });
+  }
+
+  Widget _skapaRad(ToDoPost post) {
+    final _alreadyDone = post.getDone;
+    //denna widget skapar raderna i att göra listan.
+    //_toDoInputs.contains(text) ? null : _toDoInputs.add(text);
+    return Card(
+        child: ListTile(
+      title: Text(
+        post.getTitle,
+        style: TextStyle(
+          decoration: _alreadyDone ? TextDecoration.lineThrough : null,
+        ),
+      ),
+      leading: Icon(
+        //iconen som visas för sparade vs inte sparade
+        _alreadyDone ? Icons.check_box : Icons.check_box_outline_blank_outlined,
+        color: _alreadyDone ? Colors.green : null,
+      ),
+      onTap: () {
+        int index = _toDoPoster.indexWhere((item) => item.getId == post.getId);
+        if (_alreadyDone) {
+          APIintegration().updateList(post.getTitle, false, post.getId);
+          setState(() {
+            _toDoPoster[index].setDone = false;
+          });
+        } else {
+          APIintegration().updateList(post.getTitle, true, post.getId);
+          setState(() {
+            _toDoPoster[index].setDone = true;
+          });
+        }
+      },
+      trailing: IconButton(
+        //knappen för att ta bort något från listan
+        onPressed: () {
+          APIintegration().removeFromList(post.getId);
+          setState(() {
+            _toDoPoster.removeWhere((item) => item.getId == post.getId);
+          });
+        },
+        icon: const Icon(Icons.delete_outline),
+      ),
+    ));
   }
 }
 
@@ -212,8 +254,15 @@ class _ToDoInputState extends State<ToDoInput> {
   } //detta är min kod, sno inte mvh samuel castenström
 
   void _inputHandling(String text) {
+    bool dublett = false;
+
+    for (ToDoPost obj in _toDoPoster) {
+      if (obj.getTitle == text) {
+        dublett = true;
+      }
+    }
     //denna metod hanterar och testar input
-    if (text.isEmpty || _toDoInputs.contains(text)) {
+    if (text.isEmpty || dublett) {
       //if satsen kollar om textfältet är tomt eller om det finns en dublett i listan.
       setState(() {
         showDialog(
@@ -241,53 +290,37 @@ class _ToDoInputState extends State<ToDoInput> {
         _toDoController.clear();
       });
     } else {
-      //om textinputen är ok skickas den vidare till _toDoInputs
+      //om textinputen är ok skickas den vidare till _toDoInputs och till API:n
       setState(() {
-        _toDoInputs.add(text);
+        APIintegration().addToList(text, false);
+        _ApiInputHandling().addToInputsFromApi();
         _toDoController.clear();
       });
     }
   }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  // Widget _inputErrorPopup(BuildContext context, String _fel) {
-  //   showDialog(
-  //       context: context,
-  //       builder: (BuildContext context) {
-  //         return AlertDialog(
-  //           title: const Text('Input error'),
-  //           content: Container(
-  //             child: Text(_fel),
-  //           ),
-  //           actions: <Widget>[
-  //             TextButton(
-  //                 onPressed: () {
-  //                  sno inte min kod
-  //                    mvh samuel
-  //                   Navigator.of(context).pop();
-  //                 },
-  //                 child: const Text('ok'))
-  //           ],
-  //         );
-  //       });
-  // }
+// Widget _inputErrorPopup(BuildContext context, String _fel) {
+//   showDialog(
+//       context: context,
+//       builder: (BuildContext context) {
+//         return AlertDialog(
+//           title: const Text('Input error'),
+//           content: Container(
+//             child: Text(_fel),
+//           ),
+//           actions: <Widget>[
+//             TextButton(
+//                 onPressed: () {
+//                  sno inte min kod
+//                    mvh samuel
+//                   Navigator.of(context).pop();
+//                 },
+//                 child: const Text('ok'))
+//           ],
+//         );
+//       });
+// }
 
 //  void addInputToList() {
 //    setState(() {
@@ -305,75 +338,75 @@ class _ToDoInputState extends State<ToDoInput> {
 //}
 //}         FIXA EN TEXTSTYLE OCH EN BUTTONSTYLE
 // detta är min kod kopiera inte din lille jäkel. Mvh samuel castenström
-                              // if (_toDoController.text.isEmpty ||
-                              //     _toDoInputs.contains(_toDoController.text)) {
-                              //   //if satsen kollar om textfältet är tomt eller om det finns en dublett i listan.
-                              //   setState(() {
-                              //     showDialog(
-                              //         //pop-up dialog med felmeddelande vid null eller dubletter
-                              //         context: context,
-                              //         builder: (BuildContext context) {
-                              //           return AlertDialog(
-                              //             title: const Text('Input error'),
-                              //             content: Container(
-                              //               child: Text(
-                              //                 _toDoController.text.isEmpty
-                              //                     ? 'Du måste ange en sak att göra'
-                              //                     : 'Du kan ej ange dubletter',
-                              //               ),
-                              //             ),
-                              //             actions: <Widget>[
-                              //               TextButton(
-                              //                   onPressed: () {
-                              //                     Navigator.of(context).pop();
-                              //                   },
-                              //                   child: const Text('ok'))
-                              //             ],
-                              //           );
-                              //         });
-                              //   });
-                              // } else {
-                              //   setState(() {
-                             //     _toDoInputs.add(_toDoController.text);
-                              //     _toDoController.clear();
-                              //   });
-                              // }
-    // return ListView.builder(
-    //     padding: const EdgeInsets.all(16.0),
-    //     itemBuilder: (BuildContext _context, int i) {
-    //       switch (text) {
-    //         case 'Done':
-    //           {
-    //             if (i < _toDoInputs.length && _done.contains(text)) {
-    //        sno inte min kod Mvh samuel
-    //               return _skapaRad(_toDoInputs[i]);
-    //             } else {
-    //               return const Divider(
-    //                 color: Colors.white,
-    //               );
-    //             }
-    //           }
-    //         case 'Not Done':
-    //           {
-    //             if (i < _toDoInputs.length && !_done.contains(text)) {
-    //               return _skapaRad(_toDoInputs[i]);
-    //             } else {
-    //               return const Divider(
-    //                 color: Colors.white,
-    //               );
-    //             }
-    //           }
-    //         case 'None':
-    //           {
-    //             if (i < _toDoInputs.length) {
-    //               return _skapaRad(_toDoInputs[i]);
-    //             } else {
-    //               return const Divider(
-    //                 color: Colors.white,
-    //               );
-    //             }
-    //           }
-    //         default:
-    //           throw '';
-    //       }
-    //     });
+// if (_toDoController.text.isEmpty ||
+//     _toDoInputs.contains(_toDoController.text)) {
+//   //if satsen kollar om textfältet är tomt eller om det finns en dublett i listan.
+//   setState(() {
+//     showDialog(
+//         //pop-up dialog med felmeddelande vid null eller dubletter
+//         context: context,
+//         builder: (BuildContext context) {
+//           return AlertDialog(
+//             title: const Text('Input error'),
+//             content: Container(
+//               child: Text(
+//                 _toDoController.text.isEmpty
+//                     ? 'Du måste ange en sak att göra'
+//                     : 'Du kan ej ange dubletter',
+//               ),
+//             ),
+//             actions: <Widget>[
+//               TextButton(
+//                   onPressed: () {
+//                     Navigator.of(context).pop();
+//                   },
+//                   child: const Text('ok'))
+//             ],
+//           );
+//         });
+//   });
+// } else {
+//   setState(() {
+//     _toDoInputs.add(_toDoController.text);
+//     _toDoController.clear();
+//   });
+// }
+// return ListView.builder(
+//     padding: const EdgeInsets.all(16.0),
+//     itemBuilder: (BuildContext _context, int i) {
+//       switch (text) {
+//         case 'Done':
+//           {
+//             if (i < _toDoInputs.length && _done.contains(text)) {
+//        sno inte min kod Mvh samuel
+//               return _skapaRad(_toDoInputs[i]);
+//             } else {
+//               return const Divider(
+//                 color: Colors.white,
+//               );
+//             }
+//           }
+//         case 'Not Done':
+//           {
+//             if (i < _toDoInputs.length && !_done.contains(text)) {
+//               return _skapaRad(_toDoInputs[i]);
+//             } else {
+//               return const Divider(
+//                 color: Colors.white,
+//               );
+//             }
+//           }
+//         case 'None':
+//           {
+//             if (i < _toDoInputs.length) {
+//               return _skapaRad(_toDoInputs[i]);
+//             } else {
+//               return const Divider(
+//                 color: Colors.white,
+//               );
+//             }
+//           }
+//         default:
+//           throw '';
+//       }
+//     });
