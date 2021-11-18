@@ -101,7 +101,9 @@ class _ToDoHomeState extends State<ToDoHome> {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const ToDoInput()),
-            ).then((value) => setState(() {}));
+            ).then((value) => setState(() {
+                  _ApiInputHandling().addToInputsFromApi();
+                }));
           }),
     );
   }
