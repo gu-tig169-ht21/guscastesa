@@ -101,9 +101,7 @@ class _ToDoHomeState extends State<ToDoHome> {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const ToDoInput()),
-            ).then((value) => setState(() {
-                  _ApiInputHandling().addToInputsFromApi();
-                }));
+            ).then((value) => setState(() {}));
           }),
     );
   }
@@ -293,9 +291,9 @@ class _ToDoInputState extends State<ToDoInput> {
       });
     } else {
       //om textinputen är ok skickas den vidare till _toDoInputs och till API:n
+      APIintegration().addToList(text, false);
+      _ApiInputHandling().addToInputsFromApi();
       setState(() {
-        APIintegration().addToList(text, false);
-        _ApiInputHandling().addToInputsFromApi();
         _toDoController.clear();
       });
     }
