@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'api_implementering.dart';
 
 // detta är min kod kopiera inte din lille jäkel. Mvh samuel castenström
-List<ToDoPost> _toDoPosterDone = <ToDoPost>[];
-List<ToDoPost> _toDoPosterNotDone = <ToDoPost>[];
 List<ToDoPost> _toDoPoster = <ToDoPost>[];
 final _toDoController = TextEditingController();
 String _valdFiltrering = 'All';
@@ -28,9 +26,7 @@ void main() {
 class _ApiInputHandling {
   void addToInputsFromApi() async {
     await APIintegration().getList();
-    List<ToDoPost> lista = List.from(APIintegration().returnList());
-    _toDoPoster.clear();
-    _toDoPoster = List.from(lista);
+    _toDoPoster = List.from(toDoObjects);
   }
 }
 
@@ -101,9 +97,16 @@ class _ToDoHomeState extends State<ToDoHome> {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const ToDoInput()),
-            ).then((value) => setState(() {}));
+            ).then(onGoBack);
           }),
     );
+  }
+
+  Future? onGoBack(dynamic value) {
+    setState(() {
+      _future = APIintegration().getList();
+      _ApiInputHandling().addToInputsFromApi();
+    });
   }
 
   Widget _filtrera() {
@@ -115,23 +118,13 @@ class _ToDoHomeState extends State<ToDoHome> {
     switch (_valdFiltrering) {
       case 'Done':
         {
-          _toDoPosterDone.clear();
-          for (int i = 0; i < _toDoPoster.length; i++) {
-            if (_toDoPoster[i].getDone) {
-              _toDoPosterDone.add(_toDoPoster[i]);
-            }
-          }
-          return skapaLista(_toDoPosterDone);
+          return skapaLista(
+              _toDoPoster.where((todo) => todo.done == true).toList());
         }
       case 'Not Done':
         {
-          _toDoPosterNotDone.clear();
-          for (int i = 0; i < _toDoPoster.length; i++) {
-            if (!_toDoPoster[i].getDone) {
-              _toDoPosterNotDone.add(_toDoPoster[i]);
-            }
-          }
-          return skapaLista(_toDoPosterNotDone);
+          return skapaLista(
+              _toDoPoster.where((todo) => todo.done == false).toList());
         }
       case 'All':
         {
@@ -231,10 +224,10 @@ class _ToDoInputState extends State<ToDoInput> {
                           //textfält för input
                           textInputAction: TextInputAction.done,
                           //du behöver inte trycka på lägg till knappen, textInputaction göra tt du kan trycka enter.
-                          onSubmitted: (text) {
-                            _inputHandling(text);
-                          },
                           controller: _toDoController,
+                          onSubmitted: (value) {
+                            _inputHandling(_toDoController.text);
+                          },
                           decoration: const InputDecoration(
                             labelText: 'Vad ska du göra?',
                             border: OutlineInputBorder(),
@@ -295,6 +288,7 @@ class _ToDoInputState extends State<ToDoInput> {
       _ApiInputHandling().addToInputsFromApi();
       setState(() {
         _toDoController.clear();
+        _toDoPoster = List.from(toDoObjects);
       });
     }
   }
