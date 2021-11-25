@@ -1,6 +1,5 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'main.dart';
 
 String apiNyckel = "cb27666f-8559-4bbc-8f83-83f9d40249a3";
 List<ToDoPost> toDoObjects = <ToDoPost>[];

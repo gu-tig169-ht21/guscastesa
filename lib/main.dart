@@ -1,5 +1,3 @@
-import 'dart:io';
-import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'api_implementering.dart';
 
@@ -24,9 +22,10 @@ void main() {
 }
 
 class _ApiInputHandling {
-  void addToInputsFromApi() async {
+  Future<List<ToDoPost>> addToInputsFromApi() async {
     await APIintegration().getList();
     _toDoPoster = List.from(toDoObjects);
+    return _toDoPoster;
   }
 }
 
@@ -44,8 +43,8 @@ class _ToDoHomeState extends State<ToDoHome> {
 
   @override
   void initState() {
-    _future = APIintegration().getList();
-    _ApiInputHandling().addToInputsFromApi();
+    _future = _ApiInputHandling().addToInputsFromApi();
+    //_ApiInputHandling().addToInputsFromApi();
     super.initState();
   }
 
@@ -104,8 +103,7 @@ class _ToDoHomeState extends State<ToDoHome> {
 
   Future? onGoBack(dynamic value) {
     setState(() {
-      _future = APIintegration().getList();
-      _ApiInputHandling().addToInputsFromApi();
+      _future = _ApiInputHandling().addToInputsFromApi();
     });
   }
 
@@ -264,12 +262,10 @@ class _ToDoInputState extends State<ToDoInput> {
             builder: (BuildContext context) {
               return AlertDialog(
                 title: const Text('Input error'),
-                content: Container(
-                  child: Text(
-                    text.isEmpty
-                        ? 'Du måste ange en sak att göra'
-                        : 'Du kan ej ange dubletter',
-                  ),
+                content: Text(
+                  text.isEmpty
+                      ? 'Du måste ange en sak att göra'
+                      : 'Du kan ej ange dubletter',
                 ),
                 actions: <Widget>[
                   TextButton(
@@ -285,10 +281,10 @@ class _ToDoInputState extends State<ToDoInput> {
     } else {
       //om textinputen är ok skickas den vidare till _toDoInputs och till API:n
       APIintegration().addToList(text, false);
-      _ApiInputHandling().addToInputsFromApi();
+      //_ApiInputHandling().addToInputsFromApi();
       setState(() {
         _toDoController.clear();
-        _toDoPoster = List.from(toDoObjects);
+        //_toDoPoster = List.from(toDoObjects);
       });
     }
   }
