@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'api_implementering.dart';
+import 'todo_themedata.dart';
 
 // detta är min kod kopiera inte din lille jäkel. Mvh samuel castenström
 List<ToDoPost> _toDoPoster = <ToDoPost>[];
@@ -13,10 +14,11 @@ String _valdFiltrering = 'All';
 
 void main() {
   runApp(
-    const MaterialApp(
+    MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'To-Do list',
       home: ToDoHome(),
+      theme: CustomTheme.lightTheme,
     ),
   );
 }
