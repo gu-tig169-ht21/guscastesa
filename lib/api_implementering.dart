@@ -107,9 +107,8 @@ class APIintegration {
     );
     if (respons.statusCode == 200) {
       var responsObjsJson = jsonDecode(respons.body) as List;
-      toDoObjects = responsObjsJson
-          .map((responsJson) => ToDoPost.fromJson(responsJson))
-          .toList();
+      toDoObjects =
+          responsObjsJson.map((object) => ToDoPost.fromJson(object)).toList();
       return toDoObjects;
     } else {
       throw Exception('failed to update todo list');
