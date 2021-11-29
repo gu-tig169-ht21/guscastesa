@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'api_implementering.dart';
 import 'todo_themedata.dart';
+import 'second_page.dart';
 
 // detta är min kod kopiera inte din lille jäkel. Mvh samuel castenström
-List<ToDoPost> _toDoPoster = <ToDoPost>[];
-final _toDoController = TextEditingController();
+List<ToDoPost> toDoPoster = <ToDoPost>[];
+
 String _valdFiltrering = 'All';
 
 // Skriv om koden så att du ändrar i lokala listor samtidigt som du ändrar i api:ns lista
@@ -26,8 +27,8 @@ void main() {
 class _ApiInputHandling {
   Future<List<ToDoPost>> addToInputsFromApi() async {
     await APIintegration().getList();
-    _toDoPoster = List.from(toDoObjects);
-    return _toDoPoster;
+    toDoPoster = List.from(toDoObjects);
+    return toDoPoster;
   }
 }
 
@@ -119,19 +120,19 @@ class _ToDoHomeState extends State<ToDoHome> {
       case 'Done':
         {
           return skapaLista(
-              _toDoPoster.where((todo) => todo.done == true).toList());
+              toDoPoster.where((todo) => todo.done == true).toList());
         }
       case 'Not Done':
         {
           return skapaLista(
-              _toDoPoster.where((todo) => todo.done == false).toList());
+              toDoPoster.where((todo) => todo.done == false).toList());
         }
       case 'All':
         {
-          return skapaLista(_toDoPoster);
+          return skapaLista(toDoPoster);
         }
       default:
-        return skapaLista(_toDoPoster);
+        return skapaLista(toDoPoster);
     }
   }
 
@@ -170,16 +171,16 @@ class _ToDoHomeState extends State<ToDoHome> {
         color: _alreadyDone ? Colors.green : null,
       ),
       onTap: () {
-        int index = _toDoPoster.indexWhere((item) => item.getId == post.getId);
+        int index = toDoPoster.indexWhere((item) => item.getId == post.getId);
         if (_alreadyDone) {
           APIintegration().updateList(post.getTitle, false, post.getId);
           setState(() {
-            _toDoPoster[index].setDone = false;
+            toDoPoster[index].setDone = false;
           });
         } else {
           APIintegration().updateList(post.getTitle, true, post.getId);
           setState(() {
-            _toDoPoster[index].setDone = true;
+            toDoPoster[index].setDone = true;
           });
         }
       },
@@ -188,7 +189,7 @@ class _ToDoHomeState extends State<ToDoHome> {
         onPressed: () {
           APIintegration().removeFromList(post.getId);
           setState(() {
-            _toDoPoster.removeWhere((item) => item.getId == post.getId);
+            toDoPoster.removeWhere((item) => item.getId == post.getId);
           });
         },
         icon: const Icon(Icons.delete_outline),
@@ -199,98 +200,7 @@ class _ToDoHomeState extends State<ToDoHome> {
 
 //
 //--------------------Andra sida-----------------------------
-class ToDoInput extends StatefulWidget {
-  const ToDoInput({Key? key}) : super(key: key);
-  @override
-  _ToDoInputState createState() => _ToDoInputState();
-}
 
-class _ToDoInputState extends State<ToDoInput> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: const Text('lägg till sak att göra'),
-        ),
-        body: Center(
-            child: Container(
-                alignment: Alignment.center,
-                child: SizedBox(
-                    width: 300,
-                    height: 200,
-                    child: Column(
-                      children: <Widget>[
-                        TextField(
-                          //textfält för input
-                          textInputAction: TextInputAction.done,
-                          //du behöver inte trycka på lägg till knappen, textInputaction göra tt du kan trycka enter.
-                          controller: _toDoController,
-                          onSubmitted: (value) {
-                            _inputHandling(_toDoController.text);
-                          },
-                          decoration: const InputDecoration(
-                            labelText: 'Vad ska du göra?',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                        const Divider(
-                          height: 20,
-                        ),
-                        OutlinedButton(
-                            //denna knapp skickar input från textfältet till _inputHandling
-                            onPressed: () {
-                              _inputHandling(_toDoController.text);
-                            },
-                            child: const Text('lägg till')),
-                      ],
-                    )))));
-  } //detta är min kod, sno inte mvh samuel castenström
-
-  void _inputHandling(String text) {
-    bool dublett = false;
-
-    for (ToDoPost obj in _toDoPoster) {
-      if (obj.getTitle == text) {
-        dublett = true;
-      }
-    }
-    //denna metod hanterar och testar input
-    if (text.isEmpty || dublett) {
-      //if satsen kollar om textfältet är tomt eller om det finns en dublett i listan.
-      setState(() {
-        showDialog(
-            //pop-up dialog med felmeddelande vid null eller dubletter
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: const Text('Input error'),
-                content: Text(
-                  text.isEmpty
-                      ? 'Du måste ange en sak att göra'
-                      : 'Du kan ej ange dubletter',
-                ),
-                actions: <Widget>[
-                  TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: const Text('ok'))
-                ],
-              );
-            });
-        _toDoController.clear();
-      });
-    } else {
-      //om textinputen är ok skickas den vidare till _toDoInputs och till API:n
-      APIintegration().addToList(text, false);
-      //_ApiInputHandling().addToInputsFromApi();
-      setState(() {
-        _toDoController.clear();
-        //_toDoPoster = List.from(toDoObjects);
-      });
-    }
-  }
-}
 
 // Widget _inputErrorPopup(BuildContext context, String _fel) {
 //   showDialog(
