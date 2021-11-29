@@ -8,11 +8,6 @@ List<ToDoPost> toDoPoster = <ToDoPost>[];
 
 String _valdFiltrering = 'All';
 
-// Skriv om koden så att du ändrar i lokala listor samtidigt som du ändrar i api:ns lista
-// detta gör att du itne behöver vänta på en ny lista från apit varje gång.
-// du hämtar listan en gång sedan ändrar du i den lokala listan samtidigt som du ändrar i
-// API:n lista. men du hämtar bara listan en gång vid startup.
-
 void main() {
   runApp(
     MaterialApp(
@@ -32,7 +27,6 @@ class _ApiInputHandling {
   }
 }
 
-//lägg conditions på input, inga tomma inga dubletter
 //------------------Första sidan-------------------------
 class ToDoHome extends StatefulWidget {
   const ToDoHome({Key? key}) : super(key: key);
@@ -171,6 +165,7 @@ class _ToDoHomeState extends State<ToDoHome> {
         color: _alreadyDone ? Colors.green : null,
       ),
       onTap: () {
+        //skickar information om ändrad Done till lokal och API lista
         int index = toDoPoster.indexWhere((item) => item.getId == post.getId);
         if (_alreadyDone) {
           APIintegration().updateList(post.getTitle, false, post.getId);
@@ -197,118 +192,3 @@ class _ToDoHomeState extends State<ToDoHome> {
     ));
   }
 }
-
-//
-//--------------------Andra sida-----------------------------
-
-
-// Widget _inputErrorPopup(BuildContext context, String _fel) {
-//   showDialog(
-//       context: context,
-//       builder: (BuildContext context) {
-//         return AlertDialog(
-//           title: const Text('Input error'),
-//           content: Container(
-//             child: Text(_fel),
-//           ),
-//           actions: <Widget>[
-//             TextButton(
-//                 onPressed: () {
-//                  sno inte min kod
-//                    mvh samuel
-//                   Navigator.of(context).pop();
-//                 },
-//                 child: const Text('ok'))
-//           ],
-//         );
-//       });
-// }
-
-//  void addInputToList() {
-//    setState(() {
-
-//    });
-//  }
-
-//class _ToDoListState extends State<toDoHome>{
-//
-//  Widget addItem(String userInput){
-//  setState((){
-//      _toDoInputs.add(userInput);
-//  });
-//  )
-//}
-//}         FIXA EN TEXTSTYLE OCH EN BUTTONSTYLE
-// detta är min kod kopiera inte din lille jäkel. Mvh samuel castenström
-// if (_toDoController.text.isEmpty ||
-//     _toDoInputs.contains(_toDoController.text)) {
-//   //if satsen kollar om textfältet är tomt eller om det finns en dublett i listan.
-//   setState(() {
-//     showDialog(
-//         //pop-up dialog med felmeddelande vid null eller dubletter
-//         context: context,
-//         builder: (BuildContext context) {
-//           return AlertDialog(
-//             title: const Text('Input error'),
-//             content: Container(
-//               child: Text(
-//                 _toDoController.text.isEmpty
-//                     ? 'Du måste ange en sak att göra'
-//                     : 'Du kan ej ange dubletter',
-//               ),
-//             ),
-//             actions: <Widget>[
-//               TextButton(
-//                   onPressed: () {
-//                     Navigator.of(context).pop();
-//                   },
-//                   child: const Text('ok'))
-//             ],
-//           );
-//         });
-//   });
-// } else {
-//   setState(() {
-//     _toDoInputs.add(_toDoController.text);
-//     _toDoController.clear();
-//   });
-// }
-// return ListView.builder(
-//     padding: const EdgeInsets.all(16.0),
-//     itemBuilder: (BuildContext _context, int i) {
-//       switch (text) {
-//         case 'Done':
-//           {
-//             if (i < _toDoInputs.length && _done.contains(text)) {
-//        sno inte min kod Mvh samuel
-//               return _skapaRad(_toDoInputs[i]);
-//             } else {
-//               return const Divider(
-//                 color: Colors.white,
-//               );
-//             }
-//           }
-//         case 'Not Done':
-//           {
-//             if (i < _toDoInputs.length && !_done.contains(text)) {
-//               return _skapaRad(_toDoInputs[i]);
-//             } else {
-//               return const Divider(
-//                 color: Colors.white,
-//               );
-//             }
-//           }
-//         case 'None':
-//           {
-//             if (i < _toDoInputs.length) {
-//               return _skapaRad(_toDoInputs[i]);
-//             } else {
-//               return const Divider(
-//                 color: Colors.white,
-//               );
-//             }
-//           }
-//         default:
-//           throw '';
-//       }
-//     });

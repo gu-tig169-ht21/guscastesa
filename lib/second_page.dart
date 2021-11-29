@@ -1,5 +1,4 @@
 import 'api_implementering.dart';
-import 'main.dart';
 import 'package:flutter/material.dart';
 
 final _toDoController = TextEditingController();
@@ -54,11 +53,11 @@ class _ToDoInputState extends State<ToDoInput> {
   void _inputHandling(String text) {
     bool dublett = false;
 
-    for (ToDoPost obj in toDoPoster) {
-      if (obj.getTitle == text) {
-        dublett = true;
-      }
-    }
+    // for (ToDoPost obj in toDoPoster) {
+    //   if (obj.getTitle == text) {
+    //     dublett = true;
+    //   }
+    // }
     //denna metod hanterar och testar input
     if (text.isEmpty || dublett) {
       //if satsen kollar om textfältet är tomt eller om det finns en dublett i listan.
