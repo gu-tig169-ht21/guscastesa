@@ -33,9 +33,13 @@ class _ToDoInputState extends State<ToDoInput> {
                             _inputHandling(_toDoController.text);
                           },
                           decoration: const InputDecoration(
-                            labelText: 'Vad ska du göra?',
-                            border: OutlineInputBorder(),
-                          ),
+                              labelText: 'Vad ska du göra?',
+                              labelStyle: TextStyle(color: Colors.lightGreen),
+                              border: OutlineInputBorder(),
+                              focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                color: Colors.lightGreen,
+                              ))),
                         ),
                         const Divider(
                           height: 20,
@@ -80,10 +84,8 @@ class _ToDoInputState extends State<ToDoInput> {
     } else {
       //om textinputen är ok skickas den vidare till _toDoInputs och till API:n
       APIintegration().addToList(text, false);
-      //_ApiInputHandling().addToInputsFromApi();
       setState(() {
         _toDoController.clear();
-        //_toDoPoster = List.from(toDoObjects);
       });
     }
   }

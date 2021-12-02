@@ -5,6 +5,7 @@ String apiNyckel = "cb27666f-8559-4bbc-8f83-83f9d40249a3";
 List<ToDoPost> toDoObjects = <ToDoPost>[];
 
 class ToDoPost {
+  //Objekt som motsvarar en post i lisstan vid API:et
   String id, title;
   bool done;
   ToDoPost(this.id, this.title, this.done);
@@ -38,7 +39,7 @@ class ToDoPost {
 
 class APIintegration {
   Future<List<ToDoPost>> getList() async {
-    //getID();
+    //Denna metod hämtar listan från api
     String link =
         'https://todoapp-api-pyq5q.ondigitalocean.app/todos?key=$apiNyckel';
 
@@ -127,14 +128,4 @@ class APIintegration {
       throw Exception('failed to delete todo');
     }
   }
-
-  // void _addToInputs(List<_ToDoPost> lista) {
-  //   lista.forEach((_ToDoPost) {
-  //     _toDoInputs.add(_ToDoPost.title);
-
-  //     if (_ToDoPost.done) {
-  //       _done.add(_ToDoPost.title);
-  //     }
-  //   });
-  // }
 }

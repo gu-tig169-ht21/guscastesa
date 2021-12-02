@@ -2,19 +2,22 @@ import 'package:flutter/material.dart';
 import 'api_implementering.dart';
 import 'todo_themedata.dart';
 import 'second_page.dart';
+import 'package:get/get.dart';
 
 // detta är min kod kopiera inte din lille jäkel. Mvh samuel castenström
-List<ToDoPost> toDoPoster = <ToDoPost>[];
-
-String _valdFiltrering = 'All';
+List<ToDoPost> toDoPosts = <ToDoPost>[];
+bool _darkTheme = true;
+String _chosenFilter = 'All';
 
 void main() {
   runApp(
-    MaterialApp(
+    GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'To-Do list',
-      home: ToDoHome(),
+      home: const ToDoHome(),
       theme: CustomTheme.lightTheme,
+      darkTheme: CustomTheme.darkTheme,
+      themeMode: ThemeMode.system,
     ),
   );
 }
@@ -22,8 +25,8 @@ void main() {
 class _ApiInputHandling {
   Future<List<ToDoPost>> addToInputsFromApi() async {
     await APIintegration().getList();
-    toDoPoster = List.from(toDoObjects);
-    return toDoPoster;
+    toDoPosts = List.from(toDoObjects);
+    return toDoPosts;
   }
 }
 
@@ -48,23 +51,44 @@ class _ToDoHomeState extends State<ToDoHome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Att-göra lista'), actions: [
-        DropdownButton(
-          //dropdownbutton som ger värde till filtreringen
-          value: _valdFiltrering,
-          items: <String>['Done', 'Not Done', 'All'].map((String value) {
-            return DropdownMenuItem(
-              value: value,
-              child: Text(value),
-            );
-          }).toList(),
-          onChanged: (String? newValue) {
-            setState(() {
-              _valdFiltrering = newValue!;
-            });
-          },
-        )
-      ]),
+      appBar: AppBar(
+          title: const Text('Att-göra lista'),
+          leading: IconButton(
+              icon: const Icon(Icons.settings),
+              onPressed: () {
+                if (_darkTheme) {
+                  setState(() {
+                    Get.changeThemeMode(ThemeMode.light);
+                    _darkTheme = false;
+                  });
+                } else {
+                  setState(() {
+                    Get.changeThemeMode(ThemeMode.dark);
+                    _darkTheme = true;
+                  });
+                }
+              }),
+          actions: [
+            DropdownButton(
+              //dropdownbutton som ger värde till filtreringen
+              value: _chosenFilter,
+
+              items: <String>['Done', 'Not Done', 'All'].map((String value) {
+                return DropdownMenuItem(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+              onChanged: (String? newValue) {
+                setState(() {
+                  _chosenFilter = newValue!;
+                });
+              },
+              style: TextStyle(
+                color: _darkTheme ? Colors.white : Colors.black,
+              ),
+            )
+          ]),
       body: FutureBuilder(
         builder: (ctx, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
@@ -110,23 +134,23 @@ class _ToDoHomeState extends State<ToDoHome> {
     //returnerar en skapaLista med den relevanta filtrerade
     //eller ofiltrerade listan
 
-    switch (_valdFiltrering) {
+    switch (_chosenFilter) {
       case 'Done':
         {
           return skapaLista(
-              toDoPoster.where((todo) => todo.done == true).toList());
+              toDoPosts.where((todo) => todo.done == true).toList());
         }
       case 'Not Done':
         {
           return skapaLista(
-              toDoPoster.where((todo) => todo.done == false).toList());
+              toDoPosts.where((todo) => todo.done == false).toList());
         }
       case 'All':
         {
-          return skapaLista(toDoPoster);
+          return skapaLista(toDoPosts);
         }
       default:
-        return skapaLista(toDoPoster);
+        return skapaLista(toDoPosts);
     }
   }
 
@@ -140,9 +164,7 @@ class _ToDoHomeState extends State<ToDoHome> {
           if (i < skapadLista.length) {
             return _skapaRad(skapadLista[i]);
           } else {
-            return const Divider(
-              color: Colors.white,
-            );
+            return const Divider();
           }
         });
   }
@@ -156,26 +178,33 @@ class _ToDoHomeState extends State<ToDoHome> {
       title: Text(
         post.getTitle,
         style: TextStyle(
+          color: _darkTheme ? Colors.white : Colors.black,
           decoration: _alreadyDone ? TextDecoration.lineThrough : null,
         ),
       ),
       leading: Icon(
         //iconen som visas för sparade vs inte sparade
         _alreadyDone ? Icons.check_box : Icons.check_box_outline_blank_outlined,
-        color: _alreadyDone ? Colors.lightGreen : null,
+        color: _darkTheme
+            ? _alreadyDone
+                ? Colors.lightGreen
+                : Colors.white54
+            : _alreadyDone
+                ? Colors.lightGreen
+                : null,
       ),
       onTap: () {
         //skickar information om ändrad Done till lokal och API lista
-        int index = toDoPoster.indexWhere((item) => item.getId == post.getId);
+        int index = toDoPosts.indexWhere((item) => item.getId == post.getId);
         if (_alreadyDone) {
           APIintegration().updateList(post.getTitle, false, post.getId);
           setState(() {
-            toDoPoster[index].setDone = false;
+            toDoPosts[index].setDone = false;
           });
         } else {
           APIintegration().updateList(post.getTitle, true, post.getId);
           setState(() {
-            toDoPoster[index].setDone = true;
+            toDoPosts[index].setDone = true;
           });
         }
       },
@@ -184,10 +213,13 @@ class _ToDoHomeState extends State<ToDoHome> {
         onPressed: () {
           APIintegration().removeFromList(post.getId);
           setState(() {
-            toDoPoster.removeWhere((item) => item.getId == post.getId);
+            toDoPosts.removeWhere((item) => item.getId == post.getId);
           });
         },
-        icon: const Icon(Icons.delete_outline),
+        icon: Icon(
+          Icons.delete_outline,
+          color: _darkTheme ? Colors.white54 : null,
+        ),
       ),
     ));
   }
