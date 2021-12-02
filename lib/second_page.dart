@@ -51,15 +51,8 @@ class _ToDoInputState extends State<ToDoInput> {
   } //detta är min kod, sno inte mvh samuel castenström
 
   void _inputHandling(String text) {
-    bool dublett = false;
-
-    // for (ToDoPost obj in toDoPoster) {
-    //   if (obj.getTitle == text) {
-    //     dublett = true;
-    //   }
-    // }
     //denna metod hanterar och testar input
-    if (text.isEmpty || dublett) {
+    if (text.isEmpty) {
       //if satsen kollar om textfältet är tomt eller om det finns en dublett i listan.
       setState(() {
         showDialog(

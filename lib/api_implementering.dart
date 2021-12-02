@@ -53,21 +53,11 @@ class APIintegration {
     }
   }
 
-  // Future<String> getID() async {
-  //   http.Response respons = await http.get(
-  //       Uri.parse('https://todoapp-api-pyq5q.ondigitalocean.app/register'));
-  //   if (respons.statusCode == 200) {
-  //     apiNyckel = respons.body;
-  //     return apiNyckel;
-  //   } else {
-  //     throw Exception('failed to det todo list id');
-  //   }
-  // }
-
   List<ToDoPost> returnList() {
     return toDoObjects;
   }
 
+  //lägger till en ny todo-post i listan
   Future addToList(String titel, bool done) async {
     String link =
         'https://todoapp-api-pyq5q.ondigitalocean.app/todos?key=$apiNyckel';
@@ -92,6 +82,7 @@ class APIintegration {
     }
   }
 
+  //uppdaterar en todo-post på listan
   Future updateList(String titel, bool done, String id) async {
     String link =
         'https://todoapp-api-pyq5q.ondigitalocean.app/todos/$id?key=$apiNyckel';
@@ -115,6 +106,7 @@ class APIintegration {
     }
   }
 
+  //tar bort en todo-post från listan
   Future removeFromList(String id) async {
     String link =
         'https://todoapp-api-pyq5q.ondigitalocean.app/todos/$id?key=$apiNyckel';

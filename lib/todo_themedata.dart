@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+//global Themedata för hela appen
 class CustomTheme {
   static ThemeData get lightTheme {
     return ThemeData(
@@ -12,8 +13,10 @@ class CustomTheme {
           buttonColor: Colors.lightGreen,
         ),
         appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.lightGreen,
-        ),
+            backgroundColor: Colors.lightGreen,
+            titleTextStyle: TextStyle(
+              fontWeight: FontWeight.bold,
+            )),
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
           backgroundColor: Colors.lightGreen,
         ),

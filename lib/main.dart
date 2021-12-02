@@ -162,7 +162,7 @@ class _ToDoHomeState extends State<ToDoHome> {
       leading: Icon(
         //iconen som visas för sparade vs inte sparade
         _alreadyDone ? Icons.check_box : Icons.check_box_outline_blank_outlined,
-        color: _alreadyDone ? Colors.green : null,
+        color: _alreadyDone ? Colors.lightGreen : null,
       ),
       onTap: () {
         //skickar information om ändrad Done till lokal och API lista
