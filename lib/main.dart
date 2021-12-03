@@ -100,7 +100,7 @@ class _ToDoHomeState extends State<ToDoHome> {
                 ),
               );
             } else if (snapshot.hasData) {
-              return _filtrera();
+              return _listFiltering();
             }
           }
           return const Center(
@@ -128,7 +128,7 @@ class _ToDoHomeState extends State<ToDoHome> {
     });
   }
 
-  Widget _filtrera() {
+  Widget _listFiltering() {
     //hämtar och parsar information från API:n
     // filtrerar igenom beroende på vald filtrering i dropdownen
     //returnerar en skapaLista med den relevanta filtrerade
@@ -137,24 +137,24 @@ class _ToDoHomeState extends State<ToDoHome> {
     switch (_chosenFilter) {
       case 'Done':
         {
-          return skapaLista(
+          return _createList(
               toDoPosts.where((todo) => todo.done == true).toList());
         }
       case 'Not Done':
         {
-          return skapaLista(
+          return _createList(
               toDoPosts.where((todo) => todo.done == false).toList());
         }
       case 'All':
         {
-          return skapaLista(toDoPosts);
+          return _createList(toDoPosts);
         }
       default:
-        return skapaLista(toDoPosts);
+        return _createList(toDoPosts);
     }
   }
 
-  Widget skapaLista(List<ToDoPost> skapadLista) {
+  Widget _createList(List<ToDoPost> skapadLista) {
     //Denna widget tar listan från filtrering och itererar igenom den
     //skapar en listview och kallar skapaRad för varje objekt i listan
     //den får
@@ -162,14 +162,14 @@ class _ToDoHomeState extends State<ToDoHome> {
         padding: const EdgeInsets.all(16.0),
         itemBuilder: (BuildContext _context, int i) {
           if (i < skapadLista.length) {
-            return _skapaRad(skapadLista[i]);
+            return _createRow(skapadLista[i]);
           } else {
             return const Divider();
           }
         });
   }
 
-  Widget _skapaRad(ToDoPost post) {
+  Widget _createRow(ToDoPost post) {
     final _alreadyDone = post.getDone;
     //denna widget skapar raderna i att göra listan.
     //_toDoInputs.contains(text) ? null : _toDoInputs.add(text);
